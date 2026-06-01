@@ -6,6 +6,10 @@
 
 `C:\Users\Windows\Documents\learning`
 
+线上预览地址：
+
+`https://ai-skill-quest-9u3.pages.dev/`
+
 ## 已完成
 
 - 基于 6 份 PDF 课程材料提炼学习路线。
@@ -54,6 +58,12 @@ npm run build
 本地开发服务器仍在运行：
 
 `http://127.0.0.1:5173/`
+
+Cloudflare Pages 线上访问已验证：
+
+- HTTP 状态：200
+- 页面标题：`AI Skill Quest | AI技能学习地图`
+- 安全响应头：CSP、X-Frame-Options、X-Content-Type-Options、Referrer-Policy、Permissions-Policy 已生效
 
 ## 当前阻塞
 
