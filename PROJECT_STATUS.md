@@ -52,6 +52,14 @@ npm run build
 
 ## 当前阻塞
 
+GitHub 仓库已创建并推送：
+
+`https://github.com/Kairos2425/ai-skill-quest.git`
+
+本地分支：
+
+`main -> origin/main`
+
 尝试 Vercel CLI 部署时，CLI 检测到旧 token 无效：
 
 ```text
@@ -60,13 +68,21 @@ Error: The specified token is not valid. Use `vercel login` to generate a new to
 
 浏览器打开 GitHub OAuth 授权页时出现“无法连接”。本机网络测试显示 GitHub 与 Vercel 的 443 端口均可连通，因此更可能是 OAuth 页面会话、浏览器环境或平台跳转问题，而不是项目代码问题。
 
+后续发现：浏览器使用本机代理 `127.0.0.1:21081`，终端默认未使用代理，导致 GitHub push 失败。临时给 Git 设置 `HTTP_PROXY` / `HTTPS_PROXY` 后，GitHub push 已成功。
+
+Cloudflare Wrangler CLI 可用，但非交互环境要求提供 `CLOUDFLARE_API_TOKEN`。为避免敏感 token 暴露，优先建议走 Cloudflare 网页端 GitHub Pages 集成。
+
 ## 下一步建议
 
 优先路径：
 
 1. 本地继续开发和预览：`http://127.0.0.1:5173/`
-2. 使用 Vercel 网页端重新登录，再导入 GitHub 仓库。
-3. 如果 OAuth 仍失败，使用 `dist/` 静态包手动上传到 Netlify Drop、Cloudflare Pages 或服务器。
+2. 在 Cloudflare Pages 里连接 GitHub 仓库 `Kairos2425/ai-skill-quest`。
+3. Cloudflare 构建参数：
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+   - Production branch: `main`
+4. 如果 OAuth 仍失败，使用 `dist/` 静态包手动上传到 Cloudflare Pages Direct Upload、Netlify Drop 或服务器。
 
 第二阶段：
 
