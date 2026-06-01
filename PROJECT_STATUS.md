@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-已完成一个可运行的开源学习网站 MVP，项目位于：
+已完成一个可运行的私有可控发布学习网站 MVP，项目位于：
 
 `C:\Users\Windows\Documents\learning`
 
@@ -27,6 +27,11 @@
   - 本地课程知识库检索
   - 常见问题快速提示
   - 不上传数据，不依赖 API Key
+- 已补充商业化安全边界：
+  - 仓库建议设置为 Private
+  - 不授予开源许可证
+  - 真实助教、支付、用户权益、课程资产必须后端化
+  - 公开部署只发布构建产物
 - 补齐三种部署配置：
   - GitHub Pages: `.github/workflows/pages.yml`
   - Vercel: `vercel.json`

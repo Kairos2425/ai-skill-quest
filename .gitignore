@@ -4,3 +4,12 @@ dist/
 *.log
 extracted/
 ai-skill-quest-dist.zip
+.env
+.env.*
+.vercel/
+.netlify/
+.wrangler/
+.dev.vars
+*.pem
+*.key
+*.crt

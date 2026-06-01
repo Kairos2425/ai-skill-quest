@@ -5,19 +5,19 @@
 当前项目最适合先做成静态学习网站：
 
 - 不需要登录即可访问学习地图、课程路线、任务卡和本地助教。
-- 可以立刻部署到 GitHub Pages、Vercel、Netlify。
-- 课程数据在前端 JSON/JS 文件里，后续开源协作成本低。
+- 可以立刻部署到 Cloudflare Pages、Vercel、Netlify。
+- 仓库建议设为 Private；公开环境只发布构建产物。
 - 自动助教第一版用本地知识库，不涉及 API Key 和隐私数据。
 
 ## GitHub Pages
 
-适合：开源展示、长期托管、免费、方便接受贡献。
+适合：低成本托管和自动构建。若涉及商业化，必须使用私有仓库或只发布构建产物。
 
 当前仓库已准备 `.github/workflows/pages.yml`。推送到 GitHub 后，在仓库设置里启用 Pages 的 GitHub Actions 发布即可。
 
 ## Vercel / Netlify
 
-适合：最快获得在线 URL、自动预览分支、以后接 serverless API。
+适合：最快获得在线 URL、自动预览分支、以后接 serverless API。商业逻辑和密钥必须放后端。
 
 设置：
 
@@ -51,6 +51,6 @@
 ## 分阶段计划
 
 1. 现在：完成 Vite 静态站，可本地运行与构建。
-2. 立即上线：推 GitHub，用 GitHub Pages/Vercel/Netlify 发布。
+2. 立即上线：推 GitHub 私有仓库，用 Cloudflare Pages/Vercel/Netlify 发布构建产物。
 3. 第二阶段：接入真实 LLM 助教和用户系统，可评估 InsForge 或自建 serverless。
 4. 第三阶段：需要移动端时再创建 Expo App，共用 `courseData`。

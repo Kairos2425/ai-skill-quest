@@ -55,7 +55,7 @@ function App() {
     if (completedCount < 2) return "先完成智能体基本功的 3 张卡片，建立学习坐标系。";
     if (completedCount < 6) return "进入 Python 或 OpenClaw，做一个可展示的小作品。";
     if (completedCount < 10) return "开始 SCI 工作坊，把技术成果转成论文结构。";
-    return "挑战 Boss 关：搭建个人 AI 科研副本，并开源发布。";
+    return "挑战 Boss 关：搭建个人 AI 科研副本，并可控发布。";
   }, [completedCount]);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ function App() {
           <a href="#map">学习地图</a>
           <a href="#quests">任务</a>
           <a href="#mentor">自动助教</a>
-          <a href="#open-source">开源部署</a>
+          <a href="#open-source">私有部署</a>
         </nav>
       </header>
 
@@ -167,14 +167,14 @@ function App() {
         <section className="section compact-section">
           <div className="section-title">
             <span>产品计划</span>
-            <h2>先搭 MVP，再扩展为开源学习社区</h2>
+            <h2>先搭 MVP，再扩展为可商业化学习平台</h2>
           </div>
           <div className="plan-grid">
             {[
               ["01", "内容重组", "把六份材料整理成六条航线和一个 Boss 项目。"],
               ["02", "游戏化引导", "用 XP、徽章、任务卡和作品交付驱动学习。"],
               ["03", "自动助教", "先用本地知识库检索回答，后续可接 LLM API。"],
-              ["04", "开源部署", "静态站点可直接发布到 GitHub Pages、Vercel 或 Netlify。"],
+              ["04", "私有部署", "静态站点可发布到 Cloudflare Pages、Vercel 或 Netlify。"],
             ].map(([num, title, text]) => (
               <article className="plan-card" key={num}>
                 <span>{num}</span>
@@ -250,7 +250,7 @@ function App() {
                   );
                 })}
               </div>
-              <p className="source-note">内容来源：{activeTrack.source}。本站已将培训通知式大纲改造成开源学习路线。</p>
+              <p className="source-note">内容来源：{activeTrack.source}。本站已将培训通知式大纲改造成可持续学习路线。</p>
             </div>
           </div>
         </section>
@@ -344,14 +344,14 @@ function App() {
 
         <section className="section compact-section" id="open-source">
           <div className="section-title">
-            <span>开源部署</span>
-            <h2>面向 GitHub Pages / Vercel / Netlify 的静态站点</h2>
+            <span>私有部署</span>
+            <h2>面向 Cloudflare Pages / Vercel / Netlify 的受控静态站点</h2>
           </div>
           <div className="deploy-grid">
             <article>
               <GitBranch size={24} />
-              <h3>开源仓库</h3>
-              <p>课程数据集中在 <code>src/courseData.js</code>，适合社区提交新路线、新任务和 FAQ。</p>
+              <h3>私有仓库</h3>
+              <p>课程数据集中在 <code>src/courseData.js</code>，后续商业版应迁移到后端或受控 CMS。</p>
             </article>
             <article>
               <Code2 size={24} />
@@ -372,7 +372,7 @@ function App() {
           <GraduationCap size={20} />
           <strong>AI Skill Quest</strong>
         </div>
-        <span>开源、可部署、以作品为中心的 AI 技能学习网站。</span>
+        <span>私有、可部署、以作品为中心的 AI 技能学习网站。</span>
       </footer>
     </div>
   );

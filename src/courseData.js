@@ -171,9 +171,9 @@ export const tracks = [
         tasks: ["定义 4 个子智能体角色", "产出 MVP 功能清单"],
       },
       {
-        title: "成果展示与开源发布",
-        summary: "用开源站点展示学习地图、作品集、复盘和下一阶段路线。",
-        tasks: ["发布一次 Demo", "写一份项目 README"],
+        title: "成果展示与可控发布",
+        summary: "用可控发布站点展示学习地图、作品集、复盘和下一阶段路线。",
+        tasks: ["发布一次受控 Demo", "写一份项目 README"],
       },
     ],
   },
@@ -249,8 +249,8 @@ export const assistantKnowledge = [
       "本站的学习激励建议按「模块完成数 + 任务难度 XP + 作品交付」计算。轻任务给 30-80 XP，作品任务给 120-150 XP；每完成 1、4、8、12 个模块解锁徽章，避免只刷阅读量，要把奖励绑定到产出物。",
   },
   {
-    keywords: ["部署", "github", "开源", "pages", "上线"],
+    keywords: ["部署", "github", "私有", "pages", "上线"],
     answer:
-      "这个项目是静态 Vite 站点，最简单的开源部署路径是推到 GitHub 仓库，然后使用 GitHub Pages 或 Vercel。若用 GitHub Pages，可配置 GitHub Actions 执行 npm ci、npm run build，并发布 dist 目录。",
+      "这个项目是静态 Vite 站点，建议使用 GitHub Private Repo 再连接 Cloudflare Pages 或 Vercel。公开环境只发布 dist 构建产物；真实助教、支付和用户权益逻辑必须放在后端。",
   },
 ];
