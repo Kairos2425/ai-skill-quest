@@ -31,6 +31,18 @@ function sameOrigin(request) {
   return origin === new URL(request.url).origin;
 }
 
+function normalizeAnswer(answer, question) {
+  const hasReadableChinese = /[\u4e00-\u9fa5]/.test(question);
+  if (!hasReadableChinese) return answer;
+
+  return answer
+    .replace(/^您好！?看起来您的问题似乎出现了乱码，不过别担心，我可以帮您梳理一下。\s*/u, "")
+    .replace(/^你好！?看起来你的消息可能出现了乱码。不过别担心，?\s*/u, "")
+    .replace(/^看起来.*?乱码.*?\n\n/u, "")
+    .replace(/如果问题不是这个，请重新用中文描述，我会尽力帮您解答。/u, "")
+    .trim();
+}
+
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
@@ -110,6 +122,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   const data = await result.json();
-  const answer = data?.choices?.[0]?.message?.content?.trim() || "当前未生成有效回答。";
+  const rawAnswer = data?.choices?.[0]?.message?.content?.trim() || "当前未生成有效回答。";
+  const answer = normalizeAnswer(rawAnswer, question);
   return json({ answer, mode: "deepseek" });
 }

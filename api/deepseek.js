@@ -9,6 +9,18 @@ const COURSE_CONTEXT = `
 6. 用户常用中文或中英混合提问；只要能读懂，就不要说“乱码”或要求重新描述。
 `;
 
+function normalizeAnswer(answer, question) {
+  const hasReadableChinese = /[\u4e00-\u9fa5]/.test(question);
+  if (!hasReadableChinese) return answer;
+
+  return answer
+    .replace(/^您好！?看起来您的问题似乎出现了乱码，不过别担心，我可以帮您梳理一下。\s*/u, "")
+    .replace(/^你好！?看起来你的消息可能出现了乱码。不过别担心，?\s*/u, "")
+    .replace(/^看起来.*?乱码.*?\n\n/u, "")
+    .replace(/如果问题不是这个，请重新用中文描述，我会尽力帮您解答。/u, "")
+    .trim();
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.status(405).json({ error: "Method not allowed" });
@@ -58,7 +70,8 @@ export default async function handler(request, response) {
     }
 
     const data = await result.json();
-    const answer = data?.choices?.[0]?.message?.content ?? "当前未生成有效回答。";
+    const rawAnswer = data?.choices?.[0]?.message?.content ?? "当前未生成有效回答。";
+    const answer = normalizeAnswer(rawAnswer, question);
     response.status(200).json({ answer });
   } catch (error) {
     response.status(500).json({
