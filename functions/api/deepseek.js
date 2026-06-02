@@ -7,6 +7,7 @@ const COURSE_CONTEXT = `
 4. 避免编造课程进度、用户隐私、收费权益等未提供信息。
 5. 对涉及医学、法律、财务等高风险内容，只给一般学习建议，不给专业结论。
 6. 回答要短、具体、可执行，尽量给出下一步任务。
+7. 用户常用中文或中英混合提问；只要能读懂，就不要说“乱码”或要求重新描述。
 `;
 
 const jsonHeaders = {
@@ -79,7 +80,7 @@ export async function onRequestPost({ request, env }) {
       .filter((item) => item && typeof item.content === "string" && (item.role === "user" || item.role === "assistant"))
       .slice(-6)
       .map((item) => ({ role: item.role, content: item.content.slice(0, 1200) })),
-    { role: "user", content: question },
+    { role: "user", content: `用户问题（中文或中英混合）：${question}` },
   ];
 
   const result = await fetch("https://api.deepseek.com/chat/completions", {

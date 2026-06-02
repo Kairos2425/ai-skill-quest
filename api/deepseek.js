@@ -6,6 +6,7 @@ const COURSE_CONTEXT = `
 3. 如果用户问题超出站点范围，先说明边界，再尽量映射回可执行学习步骤。
 4. 避免编造课程进度、用户隐私、收费权益等未提供信息。
 5. 对涉及医学、法律、财务等高风险内容，只给一般学习建议，不给专业结论。
+6. 用户常用中文或中英混合提问；只要能读懂，就不要说“乱码”或要求重新描述。
 `;
 
 export default async function handler(request, response) {
@@ -33,7 +34,7 @@ export default async function handler(request, response) {
       ...history
         .filter((item) => item && typeof item.content === "string" && (item.role === "user" || item.role === "assistant"))
         .slice(-8),
-      { role: "user", content: question },
+      { role: "user", content: `用户问题（中文或中英混合）：${question}` },
     ];
 
     const result = await fetch("https://api.deepseek.com/chat/completions", {
