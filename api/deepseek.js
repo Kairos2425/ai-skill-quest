@@ -10,23 +10,11 @@ const COURSE_CONTEXT = `
 `;
 
 function normalizeAnswer(answer, question) {
-  const hasReadableChinese = /[\u4e00-\u9fa5]/.test(question);
-  if (!hasReadableChinese) return answer;
-
-  const cleaned = answer
-    .replace(/^您好！?看起来您的问题似乎出现了乱码，不过别担心，我可以帮您梳理一下。\s*/u, "")
-    .replace(/^你好！?看起来你的消息可能出现了乱码。不过别担心，?\s*/u, "")
-    .replace(/^您好！?看起来您的问题可能出现了编码问题，我无法直接识别。不过别担心，我会尽力帮您。\s*/u, "")
-    .replace(/^看起来.*?乱码.*?\n\n/u, "")
-    .replace(/^.*?编码问题.*?\n\n/u, "")
-    .replace(/如果问题不是这个，请重新用中文描述，我会尽力帮您解答。/u, "")
-    .trim();
-
-  if (/(乱码|编码问题|重新描述|无法直接识别)/u.test(cleaned.slice(0, 160))) {
+  if (/(乱码|编码问题|重新描述|请重新描述|无法直接识别|无法识别输入)/u.test(answer.slice(0, 260))) {
     return fallbackChineseAnswer(question);
   }
 
-  return cleaned;
+  return answer;
 }
 
 function fallbackChineseAnswer(question) {
