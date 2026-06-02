@@ -1,23 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Award,
-  BookOpenCheck,
   Bot,
   CheckCircle2,
   ChevronRight,
   Circle,
   Code2,
   Compass,
+  FileText,
+  Flame,
+  Gamepad2,
   GitBranch,
   GraduationCap,
   Layers3,
+  ListChecks,
   MessageSquareText,
   Rocket,
   Search,
+  ShieldCheck,
   Sparkles,
+  Swords,
+  Target,
   Trophy,
 } from "lucide-react";
-import { assistantKnowledge, badges, quests, tracks } from "./courseData.js";
+import { assistantKnowledge, badges, deepseekGuide, learningLoops, quests, tracks } from "./courseData.js";
 
 const storageKey = "ai-skill-quest-progress";
 
@@ -32,12 +38,16 @@ function loadProgress() {
 
 function App() {
   const [activeTrackId, setActiveTrackId] = useState(tracks[0].id);
+  const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
   const [progress, setProgress] = useState(loadProgress);
   const [question, setQuestion] = useState("零基础科研人员应该先学哪条路线？");
   const [assistantAnswer, setAssistantAnswer] = useState("");
   const [selectedQuest, setSelectedQuest] = useState(quests[0].id);
+  const [assistantMode] = useState("local");
 
   const activeTrack = tracks.find((track) => track.id === activeTrackId) ?? tracks[0];
+  const selectedModule = activeTrack.modules[selectedModuleIndex] ?? activeTrack.modules[0];
+
   const allModules = tracks.flatMap((track) =>
     track.modules.map((module, index) => ({
       ...module,
@@ -45,17 +55,21 @@ function App() {
       moduleId: `${track.id}-${index}`,
     })),
   );
+
   const completedCount = allModules.filter((module) => progress[module.moduleId]).length;
   const totalModules = allModules.length;
   const completionRate = Math.round((completedCount / totalModules) * 100);
-  const xp = completedCount * 60 + quests.find((quest) => quest.id === selectedQuest).xp;
+  const xp = completedCount * 65 + (quests.find((quest) => quest.id === selectedQuest)?.xp ?? 0);
   const unlockedBadges = badges.filter((badge) => completedCount >= badge.threshold);
+  const currentQuest = quests.find((quest) => quest.id === selectedQuest) ?? quests[0];
+  const streak = Math.max(1, Math.min(7, completedCount + 1));
+  const energy = Math.max(18, 100 - completedCount * 5);
 
   const recommended = useMemo(() => {
-    if (completedCount < 2) return "先完成智能体基本功的 3 张卡片，建立学习坐标系。";
-    if (completedCount < 6) return "进入 Python 或 OpenClaw，做一个可展示的小作品。";
-    if (completedCount < 10) return "开始 SCI 工作坊，把技术成果转成论文结构。";
-    return "挑战 Boss 关：搭建个人 AI 科研副本，并可控发布。";
+    if (completedCount < 2) return "先完成智能体基本功，建立概念、提示词和 SOP 习惯。";
+    if (completedCount < 5) return "进入 Python 或 OpenClaw 主线，做第一个可提交作品。";
+    if (completedCount < 8) return "开始 SCI 写作训练，把学习结果转成科研表达。";
+    return "准备挑战 Boss 关，把课程、作品、助教和复盘整理成个人学习副本。";
   }, [completedCount]);
 
   useEffect(() => {
@@ -65,6 +79,10 @@ function App() {
   useEffect(() => {
     askAssistant(question);
   }, []);
+
+  useEffect(() => {
+    setSelectedModuleIndex(0);
+  }, [activeTrackId]);
 
   function toggleModule(moduleId) {
     setProgress((current) => ({ ...current, [moduleId]: !current[moduleId] }));
@@ -77,9 +95,10 @@ function App() {
   function askAssistant(input) {
     const cleanInput = input.trim();
     if (!cleanInput) {
-      setAssistantAnswer("先告诉我你的目标，比如「我要做论文选题」或「我想学 OpenClaw 自动化」。");
+      setAssistantAnswer("先告诉我你的目标，比如“我要做论文选题”或“我想把文献检索流程自动化”。");
       return;
     }
+
     const normalized = cleanInput.toLowerCase();
     const scored = assistantKnowledge
       .map((item) => ({
@@ -87,10 +106,15 @@ function App() {
         score: item.keywords.reduce((sum, keyword) => sum + (normalized.includes(keyword.toLowerCase()) ? 1 : 0), 0),
       }))
       .sort((a, b) => b.score - a.score);
+
     const best = scored[0];
     const fallback =
-      "我会把你的问题映射到学习地图：先明确目标产出，再选择航线，最后拆成一张可完成的任务卡。你可以问：Python 建模怎么学、OpenClaw 如何部署、SCI 论文如何选题、如何设置游戏化奖励。";
+      "我会先帮你确定目标产出，再匹配学习路线和当前最适合的一关。你也可以直接问：如何学 Python 建模、如何做论文选题、如何搭建 Agent 工作流、如何接入 DeepSeek 助教。";
     setAssistantAnswer(best.score > 0 ? best.answer : fallback);
+  }
+
+  function moduleDone(trackId, index) {
+    return Boolean(progress[`${trackId}-${index}`]);
   }
 
   return (
@@ -104,9 +128,9 @@ function App() {
         </a>
         <nav aria-label="主导航">
           <a href="#map">学习地图</a>
-          <a href="#quests">任务</a>
-          <a href="#mentor">自动助教</a>
-          <a href="#open-source">私有部署</a>
+          <a href="#lesson">教程关卡</a>
+          <a href="#quests">任务系统</a>
+          <a href="#mentor">AI 助教</a>
         </nav>
       </header>
 
@@ -115,19 +139,19 @@ function App() {
           <div className="hero-copy">
             <div className="eyebrow">
               <Compass size={16} />
-              由 6 份 AI/科研培训大纲重组
+              结合课程大纲、Datawhale 风格学习路径与内容生态经验重构
             </div>
-            <h1>把 AI 技能学习做成一张能闯关的科研地图</h1>
+            <h1>不是课程目录，而是一套能闯关、能产出、能盈利的 AI 学习系统</h1>
             <p>
-              从数据分析、机器学习、MATLAB、OpenClaw、Claude Code、多智能体到 SCI 写作，学习者不再面对一堆课程目录，而是沿着任务、奖励和作品一步步升级。
+              现在这个站点不再只是导航页，而是把智能体、数据分析、自动化、论文写作做成真正可执行的学习关卡。每一关都有目标、教程、练习、验收和交付物。
             </p>
             <div className="hero-actions">
-              <a className="primary-action" href="#map">
-                开始闯关
+              <a className="primary-action" href="#lesson">
+                开始第一关
                 <ChevronRight size={18} />
               </a>
               <a className="secondary-action" href="#mentor">
-                问自动助教
+                试用助教
                 <MessageSquareText size={18} />
               </a>
             </div>
@@ -141,7 +165,7 @@ function App() {
             <div className="level-ring">
               <div>
                 <strong>{completionRate}%</strong>
-                <span>地图进度</span>
+                <span>主线推进度</span>
               </div>
             </div>
             <div className="stat-grid">
@@ -150,7 +174,7 @@ function App() {
                 <strong>{xp}</strong>
               </div>
               <div>
-                <span>模块</span>
+                <span>已通关</span>
                 <strong>
                   {completedCount}/{totalModules}
                 </strong>
@@ -160,26 +184,35 @@ function App() {
                 <strong>{unlockedBadges.length}</strong>
               </div>
             </div>
+            <div className="live-stats">
+              <div>
+                <Flame size={16} />
+                <span>{streak} 日连击</span>
+              </div>
+              <div>
+                <Gamepad2 size={16} />
+                <span>能量 {energy}</span>
+              </div>
+              <div>
+                <Swords size={16} />
+                <span>当前任务：{currentQuest.tag}</span>
+              </div>
+            </div>
             <p className="next-tip">{recommended}</p>
           </div>
         </section>
 
         <section className="section compact-section">
           <div className="section-title">
-            <span>产品计划</span>
-            <h2>先搭 MVP，再扩展为可商业化学习平台</h2>
+            <span>学习闭环</span>
+            <h2>输入、执行、反馈、沉淀，才会有真正的游戏感</h2>
           </div>
           <div className="plan-grid">
-            {[
-              ["01", "内容重组", "把六份材料整理成六条航线和一个 Boss 项目。"],
-              ["02", "游戏化引导", "用 XP、徽章、任务卡和作品交付驱动学习。"],
-              ["03", "自动助教", "先用本地知识库检索回答，后续可接 LLM API。"],
-              ["04", "私有部署", "静态站点可发布到 Cloudflare Pages、Vercel 或 Netlify。"],
-            ].map(([num, title, text]) => (
-              <article className="plan-card" key={num}>
-                <span>{num}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
+            {learningLoops.map((loop, index) => (
+              <article className="plan-card" key={loop.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{loop.title}</h3>
+                <p>{loop.detail}</p>
               </article>
             ))}
           </div>
@@ -188,7 +221,7 @@ function App() {
         <section className="section" id="map">
           <div className="section-title">
             <span>学习地图</span>
-            <h2>六条航线，一个最终作品</h2>
+            <h2>先选主线，再进入关卡</h2>
           </div>
           <div className="map-layout">
             <aside className="track-list" aria-label="课程航线">
@@ -217,41 +250,163 @@ function App() {
                 </div>
                 <div className="track-meta">
                   <span>{activeTrack.hours} 学时</span>
-                  <span>{activeTrack.modules.length} 模块</span>
+                  <span>{activeTrack.modules.length} 关卡</span>
                 </div>
               </div>
 
-              <div className="outcomes">
-                {activeTrack.outcomes.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
+              <div className="track-overview">
+                <div>
+                  <strong>适合人群</strong>
+                  <p>{activeTrack.audience}</p>
+                </div>
+                <div>
+                  <strong>完成后你将获得</strong>
+                  <div className="outcomes">
+                    {activeTrack.outcomes.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="module-path">
                 {activeTrack.modules.map((module, index) => {
+                  const done = moduleDone(activeTrack.id, index);
                   const moduleId = `${activeTrack.id}-${index}`;
-                  const done = Boolean(progress[moduleId]);
                   return (
-                    <article className={`module-card ${done ? "done" : ""}`} key={moduleId}>
+                    <article
+                      className={`module-card ${done ? "done" : ""} ${selectedModuleIndex === index ? "selected" : ""}`}
+                      key={moduleId}
+                    >
                       <button className="check-button" onClick={() => toggleModule(moduleId)} aria-label="切换完成状态">
                         {done ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                       </button>
                       <div className="module-index">{String(index + 1).padStart(2, "0")}</div>
-                      <div className="module-body">
-                        <h4>{module.title}</h4>
-                        <p>{module.summary}</p>
-                        <div className="task-list">
-                          {module.tasks.map((task) => (
-                            <span key={task}>{task}</span>
-                          ))}
+                      <button className="module-focus" onClick={() => setSelectedModuleIndex(index)}>
+                        <div className="module-body">
+                          <div className="module-topline">
+                            <h4>{module.title}</h4>
+                            <span className="difficulty-badge">{module.difficulty}</span>
+                          </div>
+                          <p>{module.summary}</p>
+                          <div className="task-list">
+                            {module.tasks.map((task) => (
+                              <span key={task}>{task}</span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      </button>
                     </article>
                   );
                 })}
               </div>
-              <p className="source-note">内容来源：{activeTrack.source}。本站已将培训通知式大纲改造成可持续学习路线。</p>
+              <p className="source-note">内容来源：{activeTrack.source}。本平台已将培训大纲重组为可学习、可交付、可商业化的教程关卡。</p>
             </div>
+          </div>
+        </section>
+
+        <section className="section lesson-section" id="lesson">
+          <div className="section-title">
+            <span>教程关卡</span>
+            <h2>当前关卡：{selectedModule.title}</h2>
+          </div>
+
+          <div className="lesson-layout">
+            <article className="lesson-main">
+              <div className="lesson-header">
+                <div className="lesson-chip-group">
+                  <span className="lesson-chip">
+                    <Target size={14} />
+                    {selectedModule.difficulty}
+                  </span>
+                  <span className="lesson-chip">
+                    <Swords size={14} />
+                    任务目标
+                  </span>
+                </div>
+                <p className="lesson-mission">{selectedModule.mission}</p>
+              </div>
+
+              <section className="lesson-block">
+                <h3>学习目标</h3>
+                <ul>
+                  {selectedModule.learnGoals.map((goal) => (
+                    <li key={goal}>{goal}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="lesson-block">
+                <h3>教程正文</h3>
+                {selectedModule.tutorial.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </section>
+
+              <section className="lesson-block">
+                <h3>推荐工具栈</h3>
+                <div className="tag-wall">
+                  {selectedModule.toolStack.map((tool) => (
+                    <span key={tool}>{tool}</span>
+                  ))}
+                </div>
+              </section>
+
+              <section className="lesson-block">
+                <h3>示例提示词</h3>
+                <div className="prompt-list">
+                  {selectedModule.prompts.map((prompt) => (
+                    <blockquote key={prompt}>{prompt}</blockquote>
+                  ))}
+                </div>
+              </section>
+            </article>
+
+            <aside className="lesson-side">
+              <section className="lesson-panel">
+                <h3>
+                  <ListChecks size={18} />
+                  练习任务
+                </h3>
+                <ul>
+                  {selectedModule.tasks.map((task) => (
+                    <li key={task}>{task}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="lesson-panel">
+                <h3>
+                  <FileText size={18} />
+                  交付物
+                </h3>
+                <p>{selectedModule.deliverable}</p>
+              </section>
+
+              <section className="lesson-panel">
+                <h3>
+                  <ShieldCheck size={18} />
+                  验收标准
+                </h3>
+                <ul>
+                  {selectedModule.checklist.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="lesson-panel">
+                <h3>
+                  <BookOpenCheckIcon />
+                  参考来源类型
+                </h3>
+                <ul>
+                  {selectedModule.references.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            </aside>
           </div>
         </section>
 
@@ -259,7 +414,7 @@ function App() {
           <div>
             <div className="section-title">
               <span>任务系统</span>
-              <h2>奖励绑定作品，而不是只奖励观看</h2>
+              <h2>主线、精英、Boss 任务一起推动学习</h2>
             </div>
             <div className="quest-list">
               {quests.map((quest) => (
@@ -305,21 +460,30 @@ function App() {
         <section className="section mentor-section" id="mentor">
           <div className="mentor-copy">
             <div className="section-title">
-              <span>自动助教</span>
-              <h2>先做本地知识库助教，再接真实模型</h2>
+              <span>AI 助教</span>
+              <h2>先用本地知识助教，后续再接 DeepSeek</h2>
             </div>
             <p>
-              当前版本不会上传数据，直接根据课程知识库和关键词给出路线建议。后续部署时可接入 OpenAI、DeepSeek、Claude 或校内私有模型，让它读取课程 JSON、作业状态和 FAQ。
+              当前模式是本地知识路由，能给学习路径建议、模块推荐和交付物提醒。后续如果你提供 DeepSeek API key，我会把它接到后端接口，不会放进前端代码。
             </p>
+            <div className="deepseek-card">
+              <strong>DeepSeek 接入原则</strong>
+              <ul>
+                {deepseekGuide.backendRules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </div>
           </div>
+
           <div className="mentor-console">
             <div className="assistant-head">
               <Bot size={22} />
-              <span>AI 助教 · 本地知识库模式</span>
+              <span>AI 助教 · {assistantMode === "local" ? "本地知识模式" : "DeepSeek 模式"}</span>
             </div>
             <div className="input-row">
               <Search size={18} />
-              <input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="问我：OpenClaw 怎么学？SCI 论文怎么选题？" />
+              <input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="问我：如何做论文选题？如何设计一个 Agent 工作流？" />
               <button onClick={() => askAssistant(question)}>提问</button>
             </div>
             <div className="answer-box">
@@ -327,7 +491,7 @@ function App() {
               <p>{assistantAnswer}</p>
             </div>
             <div className="quick-prompts">
-              {["OpenClaw 如何部署？", "Python 建模怎么学？", "SCI 论文如何选题？", "奖励机制怎么设计？"].map((prompt) => (
+              {["OpenClaw 怎么学？", "Python 建模怎么学？", "SCI 论文如何选题？", "如何接入 DeepSeek 助教？"].map((prompt) => (
                 <button
                   key={prompt}
                   onClick={() => {
@@ -344,24 +508,24 @@ function App() {
 
         <section className="section compact-section" id="open-source">
           <div className="section-title">
-            <span>私有部署</span>
-            <h2>面向 Cloudflare Pages / Vercel / Netlify 的受控静态站点</h2>
+            <span>部署与商业化</span>
+            <h2>前端负责体验，后端负责助教、权益和安全</h2>
           </div>
           <div className="deploy-grid">
             <article>
               <GitBranch size={24} />
-              <h3>私有仓库</h3>
-              <p>课程数据集中在 <code>src/courseData.js</code>，后续商业版应迁移到后端或受控 CMS。</p>
+              <h3>受控发布</h3>
+              <p>前端可持续部署到 Cloudflare Pages，源码和商业逻辑继续保持私有。</p>
             </article>
             <article>
               <Code2 size={24} />
-              <h3>构建命令</h3>
-              <p><code>npm install</code> 后执行 <code>npm run build</code>，产物在 <code>dist</code>。</p>
+              <h3>后端接入</h3>
+              <p>DeepSeek、支付、权益、日志、限流都应放在后端或 Serverless。</p>
             </article>
             <article>
               <Layers3 size={24} />
-              <h3>助教升级</h3>
-              <p>把本地关键词检索替换为 API 调用，即可接入真实模型和课程知识库检索。</p>
+              <h3>内容演进</h3>
+              <p>后续可把课程内容迁移到 CMS 或数据库，做会员课程、作业批改与社区体系。</p>
             </article>
           </div>
         </section>
@@ -372,10 +536,14 @@ function App() {
           <GraduationCap size={20} />
           <strong>AI Skill Quest</strong>
         </div>
-        <span>私有、可部署、以作品为中心的 AI 技能学习网站。</span>
+        <span>私有、可部署、可持续迭代的 AI 技能学习平台。</span>
       </footer>
     </div>
   );
+}
+
+function BookOpenCheckIcon() {
+  return <FileText size={18} />;
 }
 
 export default App;
