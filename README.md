@@ -19,6 +19,7 @@ https://ai-skill-quest-9u3.pages.dev/
 - 六条学习航线：智能体基本功、OpenClaw 科研自动化、Python 机器学习、MATLAB AI、SCI 论文工作坊、个人 AI 科研副本。
 - 游戏化学习机制：模块完成、XP、徽章、每日/阶段任务。
 - 自动助教：当前为本地知识库检索模式，不上传数据；后续通过后端接入 LLM API。
+- DeepSeek 助教：通过 Cloudflare Pages Functions 的 `/api/deepseek` 服务端代理接入，API Key 只读部署平台环境变量。
 - 可控部署：支持 GitHub Private Repo + Cloudflare Pages、Vercel、Netlify。
 
 ## 本地运行

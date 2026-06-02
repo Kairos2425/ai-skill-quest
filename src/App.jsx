@@ -42,8 +42,9 @@ function App() {
   const [progress, setProgress] = useState(loadProgress);
   const [question, setQuestion] = useState("零基础科研人员应该先学哪条路线？");
   const [assistantAnswer, setAssistantAnswer] = useState("");
+  const [assistantStatus, setAssistantStatus] = useState("本地知识模式");
+  const [assistantHistory, setAssistantHistory] = useState([]);
   const [selectedQuest, setSelectedQuest] = useState(quests[0].id);
-  const [assistantMode] = useState("local");
 
   const activeTrack = tracks.find((track) => track.id === activeTrackId) ?? tracks[0];
   const selectedModule = activeTrack.modules[selectedModuleIndex] ?? activeTrack.modules[0];
@@ -77,7 +78,7 @@ function App() {
   }, [progress]);
 
   useEffect(() => {
-    askAssistant(question);
+    askAssistant(question, { remote: false });
   }, []);
 
   useEffect(() => {
@@ -92,11 +93,10 @@ function App() {
     setProgress({});
   }
 
-  function askAssistant(input) {
+  function localAssistant(input) {
     const cleanInput = input.trim();
     if (!cleanInput) {
-      setAssistantAnswer("先告诉我你的目标，比如“我要做论文选题”或“我想把文献检索流程自动化”。");
-      return;
+      return "先告诉我你的目标，比如“我要做论文选题”或“我想把文献检索流程自动化”。";
     }
 
     const normalized = cleanInput.toLowerCase();
@@ -110,7 +110,54 @@ function App() {
     const best = scored[0];
     const fallback =
       "我会先帮你确定目标产出，再匹配学习路线和当前最适合的一关。你也可以直接问：如何学 Python 建模、如何做论文选题、如何搭建 Agent 工作流、如何接入 DeepSeek 助教。";
-    setAssistantAnswer(best.score > 0 ? best.answer : fallback);
+    return best.score > 0 ? best.answer : fallback;
+  }
+
+  async function askAssistant(input, options = { remote: true }) {
+    const cleanInput = input.trim();
+    if (!cleanInput) {
+      setAssistantAnswer(localAssistant(input));
+      setAssistantStatus("等待问题");
+      return;
+    }
+
+    if (!options.remote) {
+      const answer = localAssistant(cleanInput);
+      setAssistantAnswer(answer);
+      setAssistantStatus("本地知识模式");
+      return;
+    }
+
+    setAssistantStatus("DeepSeek 思考中...");
+    try {
+      const result = await fetch("/api/deepseek", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-AI-Skill-Client": "site",
+        },
+        body: JSON.stringify({
+          question: cleanInput,
+          history: assistantHistory,
+        }),
+      });
+
+      if (!result.ok) {
+        throw new Error(`HTTP ${result.status}`);
+      }
+
+      const data = await result.json();
+      const answer = data.answer || localAssistant(cleanInput);
+      setAssistantAnswer(answer);
+      setAssistantStatus("DeepSeek 在线助教");
+      setAssistantHistory((current) =>
+        [...current, { role: "user", content: cleanInput }, { role: "assistant", content: answer }].slice(-8),
+      );
+    } catch (error) {
+      const fallback = localAssistant(cleanInput);
+      setAssistantAnswer(`${fallback}\n\n注：在线 DeepSeek 助教暂时不可用，已切换为本地知识模式。`);
+      setAssistantStatus("本地兜底模式");
+    }
   }
 
   function moduleDone(trackId, index) {
@@ -479,7 +526,7 @@ function App() {
           <div className="mentor-console">
             <div className="assistant-head">
               <Bot size={22} />
-              <span>AI 助教 · {assistantMode === "local" ? "本地知识模式" : "DeepSeek 模式"}</span>
+              <span>AI 助教 · {assistantStatus}</span>
             </div>
             <div className="input-row">
               <Search size={18} />

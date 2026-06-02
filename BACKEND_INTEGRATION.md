@@ -12,7 +12,11 @@
 
 ## 当前接口
 
-文件：
+Cloudflare Pages Functions 文件：
+
+`functions/api/deepseek.js`
+
+Vercel 备用接口文件：
 
 `api/deepseek.js`
 
@@ -41,6 +45,10 @@
 环境变量名：
 
 `DEEPSEEK_API_KEY`
+
+Cloudflare Pages 配置位置：
+
+`Pages project -> Settings -> Variables and Secrets -> Production`
 
 ## 下一步建议
 

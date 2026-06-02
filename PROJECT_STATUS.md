@@ -36,6 +36,11 @@
   - 不授予开源许可证
   - 真实助教、支付、用户权益、课程资产必须后端化
   - 公开部署只发布构建产物
+- 已接入 DeepSeek 助教服务端代理：
+  - Cloudflare Pages Functions: `functions/api/deepseek.js`
+  - 前端请求同源 `/api/deepseek`
+  - API Key 通过 Cloudflare `DEEPSEEK_API_KEY` 环境变量读取
+  - 接口失败时自动回退本地知识库模式
 - 补齐三种部署配置：
   - GitHub Pages: `.github/workflows/pages.yml`
   - Vercel: `vercel.json`
@@ -64,6 +69,11 @@ Cloudflare Pages 线上访问已验证：
 - HTTP 状态：200
 - 页面标题：`AI Skill Quest | AI技能学习地图`
 - 安全响应头：CSP、X-Frame-Options、X-Content-Type-Options、Referrer-Policy、Permissions-Policy 已生效
+
+DeepSeek 函数本地模拟已验证：
+
+- 未配置环境变量时返回 500 安全错误
+- 模拟 DeepSeek 响应时返回 200 与 `{ answer, mode }`
 
 ## 当前阻塞
 
